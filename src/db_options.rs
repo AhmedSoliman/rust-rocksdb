@@ -3863,17 +3863,31 @@ impl Default for IngestExternalFileOptions {
 }
 
 /// Used by BlockBasedOptions::set_index_type.
+#[repr(C)]
 pub enum BlockBasedIndexType {
     /// A space efficient index block that is optimized for
     /// binary-search-based index.
-    BinarySearch,
+    BinarySearch = 0,
 
     /// The hash index, if enabled, will perform a hash lookup if
     /// a prefix extractor has been provided through Options::set_prefix_extractor.
-    HashSearch,
+    HashSearch = 1,
 
     /// A two-level index implementation. Both levels are binary search indexes.
-    TwoLevelIndexSearch,
+    TwoLevelIndexSearch = 2,
+
+    /// Like BinarySearch, but index also contains first key of each block.
+    /// This allows iterators to defer reading the block until it's actually
+    /// needed. May significantly reduce read amplification of short range scans.
+    /// Without it, iterator seek usually reads one block from each level-0 file
+    /// and from each level, which may be expensive.
+    /// Works best in combination with:
+    ///  - IndexShorteningMode::NoShortening,
+    ///  - custom FlushBlockPolicy to cut blocks at some meaningful boundaries,
+    ///    e.g. when prefix changes.
+    /// Makes the index significantly bigger (2x or more), especially when keys
+    /// are long.
+    BinarySearchWithFirstKey = 3,
 }
 
 /// Used by BlockBasedOptions::set_data_block_index_type.
