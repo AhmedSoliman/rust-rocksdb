@@ -42,7 +42,7 @@ use crate::{
 /// {
 ///     let db: OptimisticTransactionDB = OptimisticTransactionDB::open_default(path).unwrap();
 ///     db.put(b"my key", b"my value").unwrap();
-///     
+///
 ///     // create transaction
 ///     let txn = db.transaction();
 ///     txn.put(b"key2", b"value2");
@@ -268,7 +268,7 @@ impl<T: ThreadMode> OptimisticTransactionDB<T> {
 
     pub fn write_opt(
         &self,
-        batch: WriteBatchWithTransaction<true>,
+        batch: &WriteBatchWithTransaction<true>,
         writeopts: &WriteOptions,
     ) -> Result<(), Error> {
         unsafe {
@@ -281,11 +281,11 @@ impl<T: ThreadMode> OptimisticTransactionDB<T> {
         Ok(())
     }
 
-    pub fn write(&self, batch: WriteBatchWithTransaction<true>) -> Result<(), Error> {
+    pub fn write(&self, batch: &WriteBatchWithTransaction<true>) -> Result<(), Error> {
         self.write_opt(batch, &WriteOptions::default())
     }
 
-    pub fn write_without_wal(&self, batch: WriteBatchWithTransaction<true>) -> Result<(), Error> {
+    pub fn write_without_wal(&self, batch: &WriteBatchWithTransaction<true>) -> Result<(), Error> {
         let mut wo = WriteOptions::new();
         wo.disable_wal(true);
         self.write_opt(batch, &wo)
